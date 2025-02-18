@@ -11,6 +11,6 @@ impl ContractAbi for ApplicationAbi {
 }
 
 impl ServiceAbi for ApplicationAbi {
-    type Query = ();
-    type QueryResponse = ();
+    type Query = async_graphql::Request;
+    type QueryResponse = async_graphql::Response;
 }
