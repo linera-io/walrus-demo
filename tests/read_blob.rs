@@ -13,7 +13,7 @@ use walrus_demo::ApplicationAbi;
 #[test_log::test(tokio::test)]
 async fn service_can_read_blob() -> anyhow::Result<()> {
     let (_validator, application_id, chain) =
-        TestValidator::with_current_application::<ApplicationAbi, _, _>((), ()).await;
+        TestValidator::with_current_application::<ApplicationAbi, _, _>("".to_owned(), ()).await;
 
     let blob_contents = "Linera test blob";
     let blob_id = publish_blob(blob_contents).await?;

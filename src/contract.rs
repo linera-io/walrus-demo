@@ -26,7 +26,7 @@ impl WithContractAbi for ApplicationContract {
 
 impl Contract for ApplicationContract {
     type Message = ();
-    type Parameters = ();
+    type Parameters = String;
     type InstantiationArgument = ();
 
     async fn load(runtime: ContractRuntime<Self>) -> Self {
