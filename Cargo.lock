@@ -4704,10 +4704,12 @@ dependencies = [
  "anyhow",
  "async-graphql",
  "async-graphql-derive",
+ "hex",
  "linera-sdk",
  "reqwest 0.12.12",
  "serde",
  "serde_json",
+ "sha2",
  "test-log",
  "tokio",
 ]
