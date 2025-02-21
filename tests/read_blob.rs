@@ -7,7 +7,8 @@ use std::env;
 
 use anyhow::{anyhow, ensure};
 use linera_sdk::test::TestValidator;
-use walrus_demo::ApplicationAbi;
+use sha2::{Digest, Sha256};
+use walrus_demo::{ApplicationAbi, Operation};
 
 /// Tests if the service can read a blob from Walrus.
 #[test_log::test(tokio::test)]
@@ -46,6 +47,32 @@ async fn service_can_read_blob() -> anyhow::Result<()> {
         .collect::<Vec<u8>>();
 
     assert_eq!(read_blob_data, blob_contents.as_bytes());
+
+    Ok(())
+}
+
+/// Tests if the contract can read and check a blob from Walrus.
+#[test_log::test(tokio::test)]
+async fn contract_can_check_blob() -> anyhow::Result<()> {
+    let aggregator_url = env::var("WALRUS_AGGREGATOR_URL")
+        .unwrap_or("https://aggregator.walrus-testnet.walrus.space".to_owned());
+
+    let (_validator, application_id, chain) = TestValidator::with_current_application::<
+        ApplicationAbi,
+        _,
+        _,
+    >(aggregator_url.to_owned(), ())
+    .await;
+
+    let blob_contents = "Linera test blob";
+    let blob_id = publish_blob(blob_contents).await?;
+    let blob_hash = Sha256::digest(blob_contents.as_bytes()).into();
+
+    chain
+        .add_block(|block| {
+            block.with_operation(application_id, Operation::CheckBlob { blob_id, blob_hash });
+        })
+        .await;
 
     Ok(())
 }
