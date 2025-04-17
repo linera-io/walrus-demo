@@ -57,7 +57,7 @@ impl Query {
         aggregator_url: String,
         blob_id: String,
     ) -> async_graphql::Result<Vec<u8>> {
-        let mut runtime = self
+        let runtime = self
             .runtime
             .lock()
             .expect("Locking should never fail because service runs in a single thread");
