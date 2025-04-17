@@ -5,14 +5,14 @@
 
 mod state;
 
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
 use async_graphql::{EmptyMutation, EmptySubscription, Schema};
 use linera_sdk::{ensure, http, linera_base_types::WithServiceAbi, Service, ServiceRuntime};
 
 #[derive(Clone)]
 pub struct ApplicationService {
-    runtime: Arc<Mutex<ServiceRuntime<Self>>>,
+    runtime: Arc<ServiceRuntime<Self>>,
 }
 
 linera_sdk::service!(ApplicationService);
@@ -26,7 +26,7 @@ impl Service for ApplicationService {
 
     async fn new(runtime: ServiceRuntime<Self>) -> Self {
         ApplicationService {
-            runtime: Arc::new(Mutex::new(runtime)),
+            runtime: Arc::new(runtime),
         }
     }
 
@@ -46,7 +46,7 @@ impl Service for ApplicationService {
 
 /// Root type that defines all the GraphQL queries available from the service.
 pub struct Query {
-    runtime: Arc<Mutex<ServiceRuntime<ApplicationService>>>,
+    runtime: Arc<ServiceRuntime<ApplicationService>>,
 }
 
 #[async_graphql::Object]
@@ -57,12 +57,7 @@ impl Query {
         aggregator_url: String,
         blob_id: String,
     ) -> async_graphql::Result<Vec<u8>> {
-        let runtime = self
-            .runtime
-            .lock()
-            .expect("Locking should never fail because service runs in a single thread");
-
-        let response = runtime.http_request(http::Request::get(format!(
+        let response = self.runtime.http_request(http::Request::get(format!(
             "{aggregator_url}/v1/blobs/{blob_id}"
         )));
 
