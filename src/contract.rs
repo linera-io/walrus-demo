@@ -6,8 +6,8 @@
 mod state;
 
 use linera_sdk::{
-    base::WithContractAbi,
     http,
+    linera_base_types::WithContractAbi,
     views::{RootView, View},
     Contract, ContractRuntime,
 };
@@ -29,6 +29,7 @@ impl WithContractAbi for ApplicationContract {
 
 impl Contract for ApplicationContract {
     type Message = ();
+    type EventValue = ();
     type Parameters = String;
     type InstantiationArgument = ();
 

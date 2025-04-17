@@ -6,21 +6,34 @@
 use std::env;
 
 use anyhow::{anyhow, ensure};
-use linera_sdk::test::TestValidator;
+use linera_sdk::test::{QueryOutcome, TestValidator};
+use reqwest::Url;
 use sha2::{Digest, Sha256};
 use walrus_demo::{ApplicationAbi, Operation};
 
 /// Tests if the service can read a blob from Walrus.
 #[test_log::test(tokio::test)]
 async fn service_can_read_blob() -> anyhow::Result<()> {
-    let (_validator, application_id, chain) =
+    let aggregator_url = env::var("WALRUS_AGGREGATOR_URL")
+        .unwrap_or("https://aggregator.walrus-testnet.walrus.space".to_owned());
+    let aggregator_host = Url::parse(&aggregator_url)?
+        .host_str()
+        .expect("Missing host in the URL")
+        .to_owned();
+
+    let (validator, application_id, chain) =
         TestValidator::with_current_application::<ApplicationAbi, _, _>("".to_owned(), ()).await;
+
+    validator
+        .change_resource_control_policy({
+            |policy| {
+                policy.http_request_allow_list.insert(aggregator_host);
+            }
+        })
+        .await;
 
     let blob_contents = "Linera test blob";
     let blob_id = publish_blob(blob_contents).await?;
-
-    let aggregator_url = env::var("WALRUS_AGGREGATOR_URL")
-        .unwrap_or("https://aggregator.walrus-testnet.walrus.space".to_owned());
 
     let query = format!(
         "query {{ \
@@ -32,7 +45,7 @@ async fn service_can_read_blob() -> anyhow::Result<()> {
     }}"
     );
 
-    let response = chain.graphql_query(application_id, query).await;
+    let QueryOutcome { response, .. } = chain.graphql_query(application_id, query).await;
     let read_blob_data = response["readBlob"]
         .as_array()
         .expect("Invalid `readBlob` response from service")
@@ -56,13 +69,25 @@ async fn service_can_read_blob() -> anyhow::Result<()> {
 async fn contract_can_check_blob() -> anyhow::Result<()> {
     let aggregator_url = env::var("WALRUS_AGGREGATOR_URL")
         .unwrap_or("https://aggregator.walrus-testnet.walrus.space".to_owned());
+    let aggregator_host = Url::parse(&aggregator_url)?
+        .host_str()
+        .expect("Missing host in the URL")
+        .to_owned();
 
-    let (_validator, application_id, chain) = TestValidator::with_current_application::<
+    let (validator, application_id, chain) = TestValidator::with_current_application::<
         ApplicationAbi,
         _,
         _,
     >(aggregator_url.to_owned(), ())
     .await;
+
+    validator
+        .change_resource_control_policy({
+            |policy| {
+                policy.http_request_allow_list.insert(aggregator_host);
+            }
+        })
+        .await;
 
     let blob_contents = "Linera test blob";
     let blob_id = publish_blob(blob_contents).await?;
