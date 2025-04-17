@@ -6,7 +6,7 @@
 use std::env;
 
 use anyhow::{anyhow, ensure};
-use linera_sdk::test::TestValidator;
+use linera_sdk::test::{QueryOutcome, TestValidator};
 use sha2::{Digest, Sha256};
 use walrus_demo::{ApplicationAbi, Operation};
 
@@ -32,7 +32,7 @@ async fn service_can_read_blob() -> anyhow::Result<()> {
     }}"
     );
 
-    let response = chain.graphql_query(application_id, query).await;
+    let QueryOutcome { response, .. } = chain.graphql_query(application_id, query).await;
     let read_blob_data = response["readBlob"]
         .as_array()
         .expect("Invalid `readBlob` response from service")
