@@ -29,6 +29,7 @@ impl WithContractAbi for ApplicationContract {
 
 impl Contract for ApplicationContract {
     type Message = ();
+    type EventValue = ();
     type Parameters = String;
     type InstantiationArgument = ();
 
