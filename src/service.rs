@@ -8,7 +8,7 @@ mod state;
 use std::sync::{Arc, Mutex};
 
 use async_graphql::{EmptyMutation, EmptySubscription, Schema};
-use linera_sdk::{base::WithServiceAbi, ensure, http, Service, ServiceRuntime};
+use linera_sdk::{ensure, http, linera_base_types::WithServiceAbi, Service, ServiceRuntime};
 
 #[derive(Clone)]
 pub struct ApplicationService {

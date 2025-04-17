@@ -6,8 +6,8 @@
 mod state;
 
 use linera_sdk::{
-    base::WithContractAbi,
     http,
+    linera_base_types::WithContractAbi,
     views::{RootView, View},
     Contract, ContractRuntime,
 };
